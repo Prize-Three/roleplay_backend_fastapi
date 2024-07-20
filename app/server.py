@@ -8,20 +8,6 @@ from langchain_core.output_parsers import StrOutputParser
 
 router = APIRouter()
 
-# CORS 설정
-origins = [
-    "http://localhost",         # 개발 중인 클라이언트 주소
-    "http://localhost:3000",    # React 개발 서버 주소
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["POST"],
-    allow_headers=["Content-Type"],
-)
-
 llm = ChatOpenAI(
     base_url="http://localhost:5000/v1",  # LM Studio의 URL
     api_key="lm-studio",
