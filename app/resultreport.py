@@ -1,10 +1,8 @@
-from fastapi import FastAPI, APIRouter, UploadFile, File
+from fastapi import APIRouter, UploadFile, File, HTTPException
 from pydantic import BaseModel
-from datetime import datetime
 from dotenv import load_dotenv
-from fastapi.middleware.cors import CORSMiddleware
 import os
-import openai
+from openai import OpenAI
 import json
 
 load_dotenv()
@@ -14,11 +12,14 @@ router = APIRouter()
 # 기본 역할 설정
 messages = [{"role": "system", "content": "역할놀이 스크립트를 보고 사용자의 언어발달, 정서발달을 분석해주세요"}]
 
-
-# 1. ChatGPT API 설정하기
+# ChatGPT API 설정하기
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
-openai.api_key = OPENAI_API_KEY
-model = "gpt-3.5-turbo"
+if not OPENAI_API_KEY:
+    raise ValueError("OPENAI_API_KEY가 설정되지 않았습니다.")
+
+client = OpenAI(
+    api_key = OPENAI_API_KEY,
+)
 
 class RolePlayAnalysisResponse(BaseModel):
     role_play: dict
@@ -30,33 +31,38 @@ class RolePlayAnalysisResponse(BaseModel):
 @router.post("/analyze_role_play/", response_model=RolePlayAnalysisResponse)
 async def analyze_role_play(file: UploadFile = File(...)): # 대화 내용이 포함된 순수 텍스트 파일 (.txt)
     global messages
-    content = await file.read()
-    script = content.decode('utf-8')
+    try:
+        content = await file.read()
+        script = content.decode('utf-8')
+        print("파일 내용:", script)
 
-    # 대화를 messages 리스트에 추가
-    messages.append(
-        {
-            "role": "system",
-            "content": script,
-        },
-    )
+        # 대화를 messages 리스트에 추가
+        messages.append(
+            {
+                "role": "user",
+                "content": script,
+            },
+        )
 
-    # OpenAI API 호출
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=f"다음 대화를 바탕으로 역할놀이 요약 분석을 JSON 형식으로 작성해 주세요:\n\n대화:\n{script}\n\nJSON 형식의 역할놀이 요약 분석:",
-        max_tokens=500
-    )
+        # OpenAI API 호출
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=messages
+        )
+        print("OpenAI 응답:", response)
 
-    response_json = response.choices[0].text.strip()
-    analysis_result = json.loads(response_json)
-    
-    return RolePlayAnalysisResponse(
-        role_play=analysis_result['role_play'],
-        conversation_summary=analysis_result['conversation_summary'],
-        language_development_analysis=analysis_result['language_development_analysis'],
-        emotional_development_analysis=analysis_result['emotional_development_analysis'],
-        interaction_patterns=analysis_result['interaction_patterns']
-    )
+        response_content = response.choices[0].message.content
+        analysis_result = json.loads(response_content)
+        print("분석 결과:", analysis_result)
+        
+        return RolePlayAnalysisResponse(
+            role_play=analysis_result['role_play'],
+            conversation_summary=analysis_result['conversation_summary'],
+            language_development_analysis=analysis_result['language_development_analysis'],
+            emotional_development_analysis=analysis_result['emotional_development_analysis'],
+            interaction_patterns=analysis_result['interaction_patterns']
+        )
+    except Exception as e:
+        print("예외 발생:", str(e))
+        raise HTTPException(status_code=500, detail=str(e))
 
-# DB관련 설정들은 아직 추가 안했음
