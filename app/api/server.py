@@ -1,10 +1,17 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from langchain_openai import ChatOpenAI
 from langchain_core.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Optional
+from datetime import datetime
+from crud.history import *
+from crud.chat_history import *
+from main import get_db
+
 
 router = APIRouter()
 
@@ -19,8 +26,13 @@ llm = ChatOpenAI(
 class Message(BaseModel):
     question: str  # 클라이언트에서 question 필드로 전송될 것으로 기대
 
+class ChatRequest(BaseModel):
+    history_id: int
+
+
+
 @router.post("/chat")
-async def chat_with_bot(message: Message):
+async def chat_with_bot(message: Message, chat_history_id: ChatRequest, db: AsyncSession = Depends(get_db)):
     try:
         prompt = PromptTemplate.from_template(
             """You are a helpful, smart, kind, and efficient AI assistant. You always fulfill the user's requests to the best of your ability.
@@ -35,6 +47,11 @@ async def chat_with_bot(message: Message):
         chain = prompt | llm | StrOutputParser()
 
         response = chain.invoke({"question": message.question})  # 클라이언트로부터 받은 질문 사용
+
+        # Dialog 레코드 생성
+        await create_dialog(db, history_id=chat_history_id, speaker="User", message=message.question)
+        await create_dialog(db, history_id=chat_history_id, speaker="AI", message=response)
+
         return {"response": response}  # JSON 형태로 응답
 
     except Exception as e:
