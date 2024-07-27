@@ -30,6 +30,30 @@ class ChatRequest(BaseModel):
     history_id: int
 
 
+class HistoryRequest(BaseModel):
+    user_id: int
+    voice_id: Optional[int]
+    situation: str
+    start_time: datetime
+    my_role: str
+    ai_role: str
+
+@router.post("/roleplay")
+async def start_roleplay(history_request: HistoryRequest, db: AsyncSession = Depends(get_db)):
+    try:
+        history = await create_history(
+            db,
+            user_id=history_request.user_id,
+            voice_id=history_request.voice_id,
+            situation=history_request.situation,
+            duration=history_request.start_time,
+            my_role=history_request.my_role,
+            ai_role=history_request.ai_role
+        )
+        return {"history_id": history.id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.post("/chat")
 async def chat_with_bot(message: Message, chat_history_id: ChatRequest, db: AsyncSession = Depends(get_db)):
