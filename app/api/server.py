@@ -11,14 +11,21 @@ from datetime import datetime
 from crud.history import *
 from crud.chat_history import *
 from main import get_db
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
+
+BASE_URL = os.getenv("BASE_URL")
+API_KEY = os.getenv("API_KEY")
+MODEL = os.getenv("MODEL")
 
 router = APIRouter()
 
 llm = ChatOpenAI(
-    base_url="http://localhost:5000/v1",  # LM Studio의 URL
-    api_key="lm-studio",
-    model="sangthree/0707_gguf",
+    base_url=BASE_URL,
+    api_key=API_KEY,
+    model=MODEL,
     streaming=True,
     callbacks=[StreamingStdOutCallbackHandler()],
 )
