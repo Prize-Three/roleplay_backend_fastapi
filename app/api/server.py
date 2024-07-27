@@ -10,7 +10,7 @@ from typing import Optional
 from datetime import datetime
 from crud.history import *
 from crud.chat_history import *
-from main import get_db
+from utils import get_db
 import os
 from dotenv import load_dotenv
 
