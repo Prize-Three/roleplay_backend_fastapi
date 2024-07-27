@@ -2,7 +2,11 @@
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import server, resultreport
+import api.server as server, api.resultreport as resultreport
+
+import database.models
+from database.database import engine
+database.models.Base.metadata.create_all(bind=engine)
 
 
 app = FastAPI()
