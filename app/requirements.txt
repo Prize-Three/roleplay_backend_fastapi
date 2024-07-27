@@ -3,3 +3,4 @@ uvicorn
 openai
 langchain_openai
 python-dotenv
+sqlalchemy
