@@ -1,20 +1,27 @@
-
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-import api.server as server, api.resultreport as resultreport
+import mysql.models as models
 
-import database.models
-from database.database import engine
-database.models.Base.metadata.create_all(bind=engine)
+from mysql.database import SessionLocal, engine
+from api import server, resultreport
 
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+#Dependency
+def get_db():
+    db = SessionLocal()
+    try : 
+        yield db
+    finally:
+        db.close()
+
 # CORS 설정
 origins = [
-    "http://localhost",         # 개발 중인 클라이언트 주소
-    "http://localhost:3000",    # React 개발 서버 주소
+    "http://localhost",
+    "http://localhost:3000",
 ]
 
 app.add_middleware(
@@ -29,4 +36,4 @@ app.include_router(server.router, prefix="/server")
 app.include_router(resultreport.router, prefix="/report")
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=True)
