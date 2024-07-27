@@ -1,0 +1,84 @@
+from pydantic import BaseModel
+from typing import List, Optional
+from datetime import datetime
+
+class DialogBase(BaseModel):
+    speaker: str
+    message: str
+    message_time: Optional[datetime] = None
+
+class DialogCreate(DialogBase):
+    history_id: int
+    user_id: int
+
+class Dialog(DialogBase):
+    id: int
+    history_id: int
+    user_id: int
+
+    class Config:
+        orm_mode = True
+
+class TagBase(BaseModel):
+    tag: str
+
+class TagCreate(TagBase):
+    history_id: int
+
+class Tag(TagBase):
+    id: int
+    history_id: int
+
+    class Config:
+        orm_mode = True
+
+class HistoryBase(BaseModel):
+    situation: str
+    duration: Optional[datetime] = None
+    date: Optional[datetime] = None
+    my_role: str
+    ai_role: str
+
+class HistoryCreate(HistoryBase):
+    user_id: int
+    voice_id: int
+
+class History(HistoryBase):
+    id: int
+    user_id: int
+    voice_id: int
+    tags: List[Tag] = []
+    dialogs: List[Dialog] = []
+
+    class Config:
+        orm_mode = True
+
+class VoiceBase(BaseModel):
+    voice_name: str
+
+class VoiceCreate(VoiceBase):
+    user_id: int
+
+class Voice(VoiceBase):
+    id: int
+    user_id: int
+
+    class Config:
+        orm_mode = True
+
+class UserBase(BaseModel):
+    name: str
+    email: str
+    join_date: Optional[datetime] = None
+    play_time: Optional[float] = None
+
+class UserCreate(UserBase):
+    pass
+
+class User(UserBase):
+    id: int
+    voices: List[Voice] = []
+    histories: List[History] = []
+
+    class Config:
+        orm_mode = True
