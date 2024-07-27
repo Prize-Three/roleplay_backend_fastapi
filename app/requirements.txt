@@ -4,3 +4,4 @@ openai
 langchain_openai
 python-dotenv
 sqlalchemy
+aiomysql
