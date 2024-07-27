@@ -10,18 +10,11 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-#Dependency
-def get_db():
-    db = SessionLocal()
-    try : 
-        yield db
-    finally:
-        db.close()
-
 # CORS 설정
 origins = [
     "http://localhost",
     "http://localhost:3000",
+    "http://localhost:8000/docs",
 ]
 
 app.add_middleware(
