@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from database.models import History, User, Voice
+from mysql.models import History, User, Voice
 
 # History 레코드 생성 함수
 async def create_history(db: AsyncSession, user_id: int, voice_id: int, situation: str, duration: datetime, my_role: str, ai_role: str):

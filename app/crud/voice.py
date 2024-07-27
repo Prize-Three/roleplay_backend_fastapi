@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from database.models import Voice
+from mysql.models import Voice
 from typing import Optional
 
 # Voice 레코드 생성 함수

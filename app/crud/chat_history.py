@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from database.models import Dialog, History
+from mysql.models import Dialog
 
 async def create_dialog(db: AsyncSession, history_id: int, user_id: int, speaker: str, message_content: str):
     db_dialog = Dialog(

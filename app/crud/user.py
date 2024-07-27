@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from database.models import User
+from mysql.models import User
 from typing import Optional
 
 # User 레코드 생성 함수
