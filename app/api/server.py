@@ -10,9 +10,9 @@ from typing import Optional
 from datetime import datetime
 from crud.history import *
 from crud.chat_history import *
-from utils import get_db
 import os
 from dotenv import load_dotenv
+from mysql.database import get_db
 
 load_dotenv()
 
