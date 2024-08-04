@@ -1,9 +1,18 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import os
 from openai import OpenAI
 import json
+from datetime import datetime
+from sqlalchemy.ext.asyncio import AsyncSession
+from mysql.database import get_db
+from sqlalchemy.future import select
+from sqlalchemy.orm import joinedload
+from crud.user import *
+from crud.history import *
+from crud.voice import *
+
 
 load_dotenv()
 
@@ -28,7 +37,20 @@ class RolePlayAnalysisResponse(BaseModel):
     emotional_development_analysis: dict
     interaction_patterns: dict
 
-@router.post("/analyze_role_play/", response_model=RolePlayAnalysisResponse)
+class HistoryResponse(BaseModel):
+    history_id: int
+    situation: str
+    date: datetime
+    duration: datetime
+    voice: str
+
+    class Config:
+        orm_mode = True
+
+class ResponseModel(BaseModel):
+    history_list: list[HistoryResponse]
+
+@router.post("/roleplay/analysis", response_model=RolePlayAnalysisResponse)
 async def analyze_role_play(file: UploadFile = File(...)): # 대화 내용이 포함된 순수 텍스트 파일 (.txt)
     global messages
     try:
@@ -65,4 +87,5 @@ async def analyze_role_play(file: UploadFile = File(...)): # 대화 내용이 �
     except Exception as e:
         print("예외 발생:", str(e))
         raise HTTPException(status_code=500, detail=str(e))
+
 
