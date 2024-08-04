@@ -89,3 +89,23 @@ async def analyze_role_play(file: UploadFile = File(...)): # 대화 내용이 �
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.get("/roleplay/chat/analysis", response_model=ResponseModel)
+async def get_chat_analyze(user_id: int, db: AsyncSession = Depends(get_db)):
+    histories = await get_histories_by_user_id(db, user_id)
+    if not histories:
+        raise HTTPException(status_code=404, detail="Histories not found for the given user_id")
+
+    response_data = []
+    for history in histories:
+        voice = await get_voice_by_id(db, history.voice_id)
+        response_data.append(
+            HistoryResponse(
+                history_id=history.id,
+                situation=history.situation,
+                date=history.date,
+                duration=history.duration,
+                voice=voice.voice_name if voice else "Unknown"
+            )
+        )
+
+    return {"history_list": response_data}
