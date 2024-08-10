@@ -82,3 +82,72 @@ class User(UserBase):
 
     class Config:
         orm_mode = True
+
+# ResultReport 모델
+class ResultReportBase(BaseModel):
+    conversation_summary: Optional[str] = None
+    child_questions: Optional[int] = None
+    child_responses: Optional[int] = None
+    interaction_summary: Optional[str] = None
+    comprehensive_results: Optional[str] = None
+
+class ResultReportCreate(ResultReportBase):
+    history_id: int
+
+class ResultReport(ResultReportBase):
+    id: int
+    history_id: int
+    vocabularies: List["Vocabulary"] = []
+    used_sentences: List["UsedSentence"] = []
+    used_words: List["UsedWord"] = []
+
+    class Config:
+        orm_mode = True
+
+# Vocabulary 모델
+class VocabularyBase(BaseModel):
+    development_type: bool
+    total_word_count: Optional[int] = None
+    basic_word_count: Optional[int] = None
+    new_word_count: Optional[int] = None
+
+class VocabularyCreate(VocabularyBase):
+    resultreport_id: int
+
+class Vocabulary(VocabularyBase):
+    id: int
+    resultreport_id: int
+
+    class Config:
+        orm_mode = True
+
+# UsedSentence 모델
+class UsedSentenceBase(BaseModel):
+    development_type: bool
+    dialog_content: Optional[str] = None
+    comment: Optional[str] = None
+
+class UsedSentenceCreate(UsedSentenceBase):
+    resultreport_id: int
+
+class UsedSentence(UsedSentenceBase):
+    id: int
+    resultreport_id: int
+
+    class Config:
+        orm_mode = True
+
+# UsedWord 모델
+class UsedWordBase(BaseModel):
+    development_type: bool
+    word: str
+
+class UsedWordCreate(UsedWordBase):
+    resultreport_id: int
+
+class UsedWord(UsedWordBase):
+    id: int
+    resultreport_id: int
+
+    class Config:
+        orm_mode = True
