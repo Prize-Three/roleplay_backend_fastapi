@@ -2,12 +2,10 @@ import uvicorn
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import mysql.models as models
-
-from mysql.database import async_engine
-from api import server, resultreport, voicelist
-
-# models.Base.metadata.create_all(bind=engine)
-# models.Base.metadata.create_all(bind=async_engine.sync_engine)
+from mysql.database import engine
+# from mysql.database import async_engine
+from api import server, resultreport
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 

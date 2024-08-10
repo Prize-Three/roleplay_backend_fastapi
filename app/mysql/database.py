@@ -8,17 +8,26 @@ import os
 
 load_dotenv()
 
-ASYNC_DB_URL = os.getenv("DATABASE_URL")
-# engine = create_engine(DB_URL,echo=True)
-# SessionLocal = sessionmaker(autocommit=False,autoflush=False, bind=engine)
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
+SessionLocal = sessionmaker(bind=engine)
 
-async_engine = create_async_engine(ASYNC_DB_URL, echo=True)
-async_session = sessionmaker(
-    autocommit=False, autoflush=False, bind=async_engine, class_=AsyncSession
-)
+ASYNC_SQLALCHEMY_DATABASE_URL = os.getenv("ASYNC_DATABASE_URL")
+async_engine = create_async_engine(ASYNC_SQLALCHEMY_DATABASE_URL)
+AsyncSessionLocal = sessionmaker(bind=async_engine, class_=AsyncSession)
 
 Base = declarative_base()
 
+# 동기용 의존성
+# def get_db(): #이름 아래와 다르게
+#     db = SessionLocal()
+#     try:
+#         # Generator
+#         yield db
+#     finally:
+#         db.close()
+
+# 비동기용 의존성
 async def get_db():
-    async with async_session() as session:
+    async with AsyncSessionLocal() as session:
         yield session
