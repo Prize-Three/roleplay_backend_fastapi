@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Float, Enum
+from sqlalchemy import *
 from sqlalchemy.orm import relationship
 import enum
 from datetime import datetime
@@ -15,6 +15,32 @@ class User(Base):
     voices = relationship("Voice", back_populates="user")
     histories = relationship("History", back_populates="user")
 
+# class Voice(Base):
+#     __tablename__ = "voices"
+#     id = Column(Integer, primary_key=True, index=True)
+#     user_id = Column(Integer, ForeignKey('users.id'))
+#     voice_name = Column(String(50))
+
+#     user = relationship("User", back_populates="voices")
+#     histories = relationship("History", back_populates="voice")
+
+# class History(Base):
+#     __tablename__ = "histories"
+#     id = Column(Integer, primary_key=True, index=True)
+#     user_id = Column(Integer, ForeignKey('users.id'))
+#     voice_id = Column(Integer, ForeignKey('voices.id'))
+#     situation = Column(String(100))
+#     duration = Column(DateTime)
+#     date = Column(DateTime, default=datetime.utcnow)
+#     my_role = Column(String(100))
+#     ai_role = Column(String(100))
+
+#     user = relationship("User", back_populates="histories")
+#     voice = relationship("Voice", back_populates="histories")
+#     tags = relationship("Tag", back_populates="history")
+#     dialogs = relationship("Dialog", back_populates="history")
+    # result_report = relationship("ResultReport", back_populates="history", uselist=False)
+    
 class Voice(Base):
     __tablename__ = "voices"
     id = Column(Integer, primary_key=True, index=True)
@@ -22,6 +48,7 @@ class Voice(Base):
     voice_name = Column(String(50))
 
     user = relationship("User", back_populates="voices")
+    histories = relationship("History", back_populates="voice")  # back_populates를 수정
 
 class History(Base):
     __tablename__ = "histories"
@@ -29,15 +56,19 @@ class History(Base):
     user_id = Column(Integer, ForeignKey('users.id'))
     voice_id = Column(Integer, ForeignKey('voices.id'))
     situation = Column(String(100))
-    duration = Column(DateTime)
-    date = Column(DateTime, default=datetime.utcnow)
+    start_time = Column(Time)  # 시작 시간
+    end_time = Column(Time)  # 종료 시간
+    date = Column(Date, default=datetime.utcnow)
     my_role = Column(String(100))
     ai_role = Column(String(100))
 
     user = relationship("User", back_populates="histories")
-    voice = relationship("Voice")
+    voice = relationship("Voice", back_populates="histories")  # Voice와 연결된 back_populates 수정
     tags = relationship("Tag", back_populates="history")
     dialogs = relationship("Dialog", back_populates="history")
+    result_report = relationship("ResultReport", back_populates="history", uselist=False)
+
+
 
 class Tag(Base):
     __tablename__ = "tags"
@@ -61,3 +92,49 @@ class Dialog(Base):
     message_time = Column(DateTime, default=datetime.utcnow)
 
     history = relationship("History", back_populates="dialogs")
+
+# 추가 모델 정의
+class ResultReport(Base):
+    __tablename__ = "result_reports"
+    id = Column(Integer, primary_key=True, index=True)
+    history_id = Column(Integer, ForeignKey('histories.id'))
+    conversation_summary = Column(Text)
+    child_questions = Column(Integer)
+    child_responses = Column(Integer)
+    interaction_summary = Column(Text)
+    comprehensive_results = Column(Text)
+
+    history = relationship("History", back_populates="result_report")
+    vocabularies = relationship("Vocabulary", back_populates="result_report")
+    used_sentences = relationship("UsedSentence", back_populates="result_report")
+    used_words = relationship("UsedWord", back_populates="result_report")
+
+class Vocabulary(Base):
+    __tablename__ = "vocabularies"
+    id = Column(Integer, primary_key=True, index=True)
+    result_report_id = Column(Integer, ForeignKey('result_reports.id'))
+    development_type = Column(Boolean)
+    total_word_count = Column(Integer)
+    basic_word_count = Column(Integer)
+    new_word_count = Column(Integer)
+
+    result_report = relationship("ResultReport", back_populates="vocabularies")
+
+class UsedSentence(Base):
+    __tablename__ = "used_sentences"
+    id = Column(Integer, primary_key=True, index=True)
+    result_report_id = Column(Integer, ForeignKey('result_reports.id'))
+    development_type = Column(Boolean)
+    dialog_content = Column(Text)
+    comment = Column(Text)
+
+    result_report = relationship("ResultReport", back_populates="used_sentences")
+
+class UsedWord(Base):
+    __tablename__ = "used_words"
+    id = Column(Integer, primary_key=True, index=True)
+    result_report_id = Column(Integer, ForeignKey('result_reports.id'))
+    development_type = Column(Boolean)
+    word = Column(String(20))
+
+    result_report = relationship("ResultReport", back_populates="used_words")
