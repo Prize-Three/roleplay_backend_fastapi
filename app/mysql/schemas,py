@@ -36,7 +36,8 @@ class Tag(TagBase):
 
 class HistoryBase(BaseModel):
     situation: str
-    duration: Optional[datetime] = None
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
     date: Optional[datetime] = None
     my_role: str
     ai_role: str
