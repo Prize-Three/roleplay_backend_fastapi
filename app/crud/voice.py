@@ -19,6 +19,7 @@ async def get_voice_by_id(db: AsyncSession, voice_id: int):
     result = await db.execute(select(Voice).where(Voice.id == voice_id))
     return result.scalars().first()
 
+
 # 특정 사용자의 모든 Voice 레코드 조회 함수
 async def get_voices_by_user_id(db: AsyncSession, user_id: int):
     result = await db.execute(select(Voice).where(Voice.user_id == user_id))
