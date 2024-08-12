@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 from datetime import datetime
 from crud.history import *
-from crud.chat_history import *
+from crud.dialog import *
 import os
 from dotenv import load_dotenv
 from mysql.database import get_db
@@ -41,7 +41,6 @@ class HistoryRequest(BaseModel):
     user_id: int
     voice_id: Optional[int]
     situation: str
-    start_time: datetime
     my_role: str
     ai_role: str
 
@@ -53,7 +52,7 @@ async def start_roleplay(history_request: HistoryRequest, db: AsyncSession = Dep
             user_id=history_request.user_id,
             voice_id=history_request.voice_id,
             situation=history_request.situation,
-            duration=history_request.start_time,
+            start_time=datetime.now().time(),
             my_role=history_request.my_role,
             ai_role=history_request.ai_role
         )
