@@ -8,9 +8,9 @@ import os
 
 load_dotenv()
 
-# SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
-# engine = create_engine(SQLALCHEMY_DATABASE_URL)
-# SessionLocal = sessionmaker(bind=engine)
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
+SessionLocal = sessionmaker(bind=engine)
 
 ASYNC_SQLALCHEMY_DATABASE_URL = os.getenv("ASYNC_DATABASE_URL")
 async_engine = create_async_engine(ASYNC_SQLALCHEMY_DATABASE_URL)

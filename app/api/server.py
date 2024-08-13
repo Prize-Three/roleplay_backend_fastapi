@@ -35,7 +35,7 @@ llm = ChatOpenAI(
 #     question: str  # 클라이언트에서 question 필드로 전송될 것으로 기대
 
 # class ChatRequest(BaseModel):
-    # history_id: int
+#     history_id: int
 
 
 class HistoryRequest(BaseModel):
@@ -49,6 +49,7 @@ class HistoryRequest(BaseModel):
 
 class MessageData(BaseModel):
     message: dict
+    chat_history_id: dict
 
 
 
@@ -96,9 +97,10 @@ async def start_roleplay(history_request: HistoryRequest, db: AsyncSession = Dep
 #         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/chat")
-async def chat_with_bot(data: MessageData):
+async def chat_with_bot(data: MessageData, db: AsyncSession = Depends(get_db)):
     try:
         question = data.message.get('question')
+        history_id = data.chat_history_id.get('history_id')
 
         prompt = ChatPromptTemplate.from_messages([
             ("system", "You are an assistant, and your task is to answer only in Korean as if you were a visiting patient. The doctor is asking questions to better understand your symptoms. You answer the doctor's questions with simple and easy expressions."),
@@ -108,8 +110,15 @@ async def chat_with_bot(data: MessageData):
         chain = prompt | llm | StrOutputParser()
 
         response = chain.invoke({"question": question})
+        print(f"response: {response}")
+
+        # Dialog 레코드 생성
+        await create_dialog(db, history_id=history_id, speaker="User", message_content=question)
+        print("db1 complete")
+        await create_dialog(db, history_id=history_id, speaker="AI", message_content=response)
         
         print(f"Send message: {question}")
+        print(f"Processing history_id: {history_id}")
 
         return {"response": response}
 

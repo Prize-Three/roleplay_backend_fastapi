@@ -2,7 +2,7 @@ from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import os
-# from openai import OpenAI
+from openai import OpenAI
 import openai
 import json
 from datetime import datetime
@@ -35,11 +35,11 @@ OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
 if not OPENAI_API_KEY:
     raise ValueError("OPENAI_API_KEY가 설정되지 않았습니다.")
 
-# client = OpenAI(
-#     api_key = OPENAI_API_KEY,
-# )
+client = OpenAI(
+    api_key = OPENAI_API_KEY,
+)
 
-openai.api_key = OPENAI_API_KEY
+# openai.api_key = OPENAI_API_KEY
 
 class RolePlayAnalysisResponse(BaseModel):
     role_play: dict
