@@ -13,6 +13,7 @@ from crud.dialog import *
 import os
 from dotenv import load_dotenv
 from mysql.database import get_db
+from langchain_core.prompts import ChatPromptTemplate
 
 load_dotenv()
 
@@ -30,11 +31,11 @@ llm = ChatOpenAI(
     callbacks=[StreamingStdOutCallbackHandler()],
 )
 
-class Message(BaseModel):
-    question: str  # 클라이언트에서 question 필드로 전송될 것으로 기대
+# class Message(BaseModel):
+#     question: str  # 클라이언트에서 question 필드로 전송될 것으로 기대
 
-class ChatRequest(BaseModel):
-    history_id: int
+# class ChatRequest(BaseModel):
+    # history_id: int
 
 
 class HistoryRequest(BaseModel):
@@ -43,6 +44,13 @@ class HistoryRequest(BaseModel):
     situation: str
     my_role: str
     ai_role: str
+
+#------------------------------------
+
+class MessageData(BaseModel):
+    message: dict
+
+
 
 @router.post("/roleplay")
 async def start_roleplay(history_request: HistoryRequest, db: AsyncSession = Depends(get_db)):
@@ -61,28 +69,50 @@ async def start_roleplay(history_request: HistoryRequest, db: AsyncSession = Dep
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# @router.post("/chat")
+# async def chat_with_bot(message: Message, chat_history_id: ChatRequest, db: AsyncSession = Depends(get_db)):
+#     try:
+#         prompt = PromptTemplate.from_template(
+#             """You are a helpful, smart, kind, and efficient AI assistant. You always fulfill the user's requests to the best of your ability.
+#             You must generate an answer in Korean.
+
+#             #Question:
+#             {question}
+
+#             #Answer: """
+#         )
+
+#         chain = prompt | llm | StrOutputParser()
+
+#         response = chain.invoke({"question": message.question})  # 클라이언트로부터 받은 질문 사용
+
+#         # Dialog 레코드 생성
+#         await create_dialog(db, history_id=chat_history_id, speaker="User", message=message.question)
+#         await create_dialog(db, history_id=chat_history_id, speaker="AI", message=response)
+
+#         return {"response": response}  # JSON 형태로 응답
+
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
+
 @router.post("/chat")
-async def chat_with_bot(message: Message, chat_history_id: ChatRequest, db: AsyncSession = Depends(get_db)):
+async def chat_with_bot(data: MessageData):
     try:
-        prompt = PromptTemplate.from_template(
-            """You are a helpful, smart, kind, and efficient AI assistant. You always fulfill the user's requests to the best of your ability.
-            You must generate an answer in Korean.
+        question = data.message.get('question')
 
-            #Question:
-            {question}
-
-            #Answer: """
-        )
+        prompt = ChatPromptTemplate.from_messages([
+            ("system", "You are an assistant, and your task is to answer only in Korean as if you were a visiting patient. The doctor is asking questions to better understand your symptoms. You answer the doctor's questions with simple and easy expressions."),
+            ("human", question)
+        ])
 
         chain = prompt | llm | StrOutputParser()
 
-        response = chain.invoke({"question": message.question})  # 클라이언트로부터 받은 질문 사용
+        response = chain.invoke({"question": question})
+        
+        print(f"Send message: {question}")
 
-        # Dialog 레코드 생성
-        await create_dialog(db, history_id=chat_history_id, speaker="User", message=message.question)
-        await create_dialog(db, history_id=chat_history_id, speaker="AI", message=response)
-
-        return {"response": response}  # JSON 형태로 응답
+        return {"response": response}
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"Error: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
