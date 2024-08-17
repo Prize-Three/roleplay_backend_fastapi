@@ -5,7 +5,7 @@ import os
 from openai import OpenAI
 import openai
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
 from mysql.database import get_db
 from sqlalchemy.future import select
@@ -75,6 +75,7 @@ class HistoryResponse(BaseModel):
     setting_voice: str
     start_time: str
     end_time: str
+    duration: str
 
 class VocabularyResponse(BaseModel):
     total_word_count: int
@@ -108,6 +109,21 @@ class FullReportResponse(BaseModel):
     emotional_development: EmotionalDevelopmentResponse
 
 
+def time_to_seconds(t):
+    return t.hour * 3600 + t.minute * 60 + t.second
+
+def format_duration(seconds):
+    hours, remainder = divmod(seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    
+    if hours > 0:
+        return f"{hours}시간 {minutes}분 {seconds}초"
+    elif minutes > 0:
+        return f"{minutes}분 {seconds}초"
+    else:
+        return f"{seconds}초"
+
+
 @router.get("/{history_id}", response_model=FullReportResponse)
 async def get_report(history_id: int, db: AsyncSession = Depends(get_db)):
     history = await get_history_by_id(db, history_id)
@@ -131,6 +147,20 @@ async def get_report(history_id: int, db: AsyncSession = Depends(get_db)):
     used_sentences_lang = await get_used_sentences_by_report_id(db, report.id, True)  # 언어발달 관련 문장들
     used_sentences_emotion = await get_used_sentences_by_report_id(db, report.id, False)  # 정서발달 관련 문장들
 
+    # duration 계산 (datetime.time에서 초 단위로 변환 후 계산)
+    if history.start_time and history.end_time:
+        start_seconds = time_to_seconds(history.start_time)
+        end_seconds = time_to_seconds(history.end_time)
+        duration_seconds = end_seconds - start_seconds
+
+        if duration_seconds < 0:
+            # 만약 end_time이 start_time보다 작다면, 그날의 시간을 넘어간 것으로 간주하여 24시간을 추가
+            duration_seconds += 24 * 3600
+        
+        formatted_duration = format_duration(duration_seconds)  # 사람이 읽기 쉬운 형식으로 변환
+    else:
+        formatted_duration = None
+
     return FullReportResponse(
         history=HistoryResponse(
             type=history.situation,
@@ -138,7 +168,8 @@ async def get_report(history_id: int, db: AsyncSession = Depends(get_db)):
             ai_role=history.ai_role,
             setting_voice=findvoice.voice_name,
             start_time=history.start_time.strftime("%H:%M:%S") if history.start_time else None,
-            end_time=history.end_time.strftime("%H:%M:%S") if history.end_time else None
+            end_time=history.end_time.strftime("%H:%M:%S") if history.end_time else None,
+            duration=formatted_duration
         ),
         report=ReportResponse(
             conversation_summary=report.conversation_summary,
