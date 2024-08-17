@@ -71,30 +71,34 @@ async def start_roleplay(history_request: HistoryRequest, db: AsyncSession = Dep
 
 
 # @router.post("/chat")
-# async def chat_with_bot(message: Message, chat_history_id: ChatRequest, db: AsyncSession = Depends(get_db)):
+# async def chat_with_bot(data: MessageData, db: AsyncSession = Depends(get_db)):
 #     try:
-#         prompt = PromptTemplate.from_template(
-#             """You are a helpful, smart, kind, and efficient AI assistant. You always fulfill the user's requests to the best of your ability.
-#             You must generate an answer in Korean.
+#         question = data.message.get('question')
+#         history_id = data.chat_history_id.get('history_id')
 
-#             #Question:
-#             {question}
-
-#             #Answer: """
-#         )
+#         prompt = ChatPromptTemplate.from_messages([
+#             ("system", "You are an assistant, and your task is to answer only in Korean as if you were a visiting patient. The doctor is asking questions to better understand your symptoms. You answer the doctor's questions with simple and easy expressions."),
+#             ("human", question)
+#         ])
 
 #         chain = prompt | llm | StrOutputParser()
 
-#         response = chain.invoke({"question": message.question})  # 클라이언트로부터 받은 질문 사용
+#         response = chain.invoke({"question": question})
+#         print(f"response: {response}")
 
 #         # Dialog 레코드 생성
-#         await create_dialog(db, history_id=chat_history_id, speaker="User", message=message.question)
-#         await create_dialog(db, history_id=chat_history_id, speaker="AI", message=response)
+#         await create_dialog(db, history_id=history_id, speaker="User", message_content=question)
+#         print("db1 complete")
+#         await create_dialog(db, history_id=history_id, speaker="AI", message_content=response)
+        
+#         print(f"Send message: {question}")
+#         print(f"Processing history_id: {history_id}")
 
-#         return {"response": response}  # JSON 형태로 응답
+#         return {"response": response}
 
 #     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
+#         print(f"Error: {e}")
+#         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 @router.post("/chat")
 async def chat_with_bot(data: MessageData, db: AsyncSession = Depends(get_db)):
@@ -102,13 +106,35 @@ async def chat_with_bot(data: MessageData, db: AsyncSession = Depends(get_db)):
         question = data.message.get('question')
         history_id = data.chat_history_id.get('history_id')
 
+        # History 객체 가져오기
+        history = await get_history_by_id(db, history_id)
+
+        if not history:
+            raise HTTPException(status_code=404, detail="History not found")
+
+        # 상황에 따라 프롬프트 설정
+        if history.situation == "병원놀이":
+            prompt_text = ("You are an AI assistant, and your task is to answer only in Korean as if you were a patient visiting a doctor. "
+                           "The user is the doctor asking questions to better understand your symptoms. "
+                           "Respond to the doctor's questions with simple and easy expressions suitable for children aged 3-7.")
+        elif history.situation == "요리놀이":
+            prompt_text = ("You are an AI assistant, and your task is to answer only in Korean as if you were a customer at a restaurant. "
+                           "The user is the chef asking what you would like to eat. "
+                           "Respond to the chef's questions with simple and easy expressions suitable for children aged 3-7.")
+        else:
+            # 기본 프롬프트 설정 (필요에 따라 수정)
+            prompt_text = ("You are an AI assistant, and your task is to answer only in Korean. "
+                           "The user is asking questions, and you need to respond accordingly.")
+
+        # 프롬프트와 질문 연결
         prompt = ChatPromptTemplate.from_messages([
-            ("system", "You are an assistant, and your task is to answer only in Korean as if you were a visiting patient. The doctor is asking questions to better understand your symptoms. You answer the doctor's questions with simple and easy expressions."),
+            ("system", prompt_text),
             ("human", question)
         ])
 
         chain = prompt | llm | StrOutputParser()
 
+        # 질문에 대한 응답 생성
         response = chain.invoke({"question": question})
         print(f"response: {response}")
 
@@ -116,7 +142,7 @@ async def chat_with_bot(data: MessageData, db: AsyncSession = Depends(get_db)):
         await create_dialog(db, history_id=history_id, speaker="User", message_content=question)
         print("db1 complete")
         await create_dialog(db, history_id=history_id, speaker="AI", message_content=response)
-        
+
         print(f"Send message: {question}")
         print(f"Processing history_id: {history_id}")
 
