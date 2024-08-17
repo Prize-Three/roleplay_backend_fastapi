@@ -4,6 +4,7 @@ from mysql.models import Dialog
 
 async def create_dialog(db: AsyncSession, history_id: int, speaker: str, message_content: str):
     db_dialog = Dialog(
+        user_id=1,
         history_id=history_id,
         speaker=speaker,
         message=message_content
