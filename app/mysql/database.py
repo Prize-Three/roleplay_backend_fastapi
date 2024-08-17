@@ -14,7 +14,7 @@ SessionLocal = sessionmaker(bind=engine)
 
 ASYNC_SQLALCHEMY_DATABASE_URL = os.getenv("ASYNC_DATABASE_URL")
 async_engine = create_async_engine(ASYNC_SQLALCHEMY_DATABASE_URL)
-AsyncSessionLocal = sessionmaker(bind=async_engine, class_=AsyncSession)
+AsyncSessionLocal = sessionmaker(bind=async_engine, class_=AsyncSession, expire_on_commit=False)
 
 Base = declarative_base()
 
