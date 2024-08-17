@@ -251,7 +251,7 @@ async def analyze_role_play(request: RolePlayAnalysisRequest, db: AsyncSession =
         if not history:
             raise HTTPException(status_code=404, detail="History not found")
 
-        history.end_time = datetime.utcnow().time()
+        history.end_time = datetime.now().time(),
         await db.commit()
         await db.refresh(history)
 
