@@ -112,19 +112,19 @@ async def chat_with_bot(data: MessageData, db: AsyncSession = Depends(get_db)):
         if not history:
             raise HTTPException(status_code=404, detail="History not found")
 
-        # 상황에 따라 프롬프트 설정
-        if history.situation == "병원놀이":
+
+        if history.situation == "병원 놀이" and history.my_role == "의사" and history.ai_role == "환자":
             prompt_text = ("You are an AI assistant, and your task is to answer only in Korean as if you were a patient visiting a doctor. "
-                           "The user is the doctor asking questions to better understand your symptoms. "
-                           "Respond to the doctor's questions with simple and easy expressions suitable for children aged 3-7.")
-        elif history.situation == "요리놀이":
+                        "The user is the doctor asking questions to better understand your symptoms. "
+                        "Respond to the doctor's questions with simple and easy expressions suitable for children aged 3-7.")
+        elif history.situation == "요리 놀이" and history.my_role == "요리사" and history.ai_role == "손님":
             prompt_text = ("You are an AI assistant, and your task is to answer only in Korean as if you were a customer at a restaurant. "
-                           "The user is the chef asking what you would like to eat. "
-                           "Respond to the chef's questions with simple and easy expressions suitable for children aged 3-7.")
+                        "The user is the chef asking what you would like to eat. "
+                        "Respond to the chef's questions with simple and easy expressions suitable for children aged 3-7.")
         else:
-            # 기본 프롬프트 설정 (필요에 따라 수정)
             prompt_text = ("You are an AI assistant, and your task is to answer only in Korean. "
-                           "The user is asking questions, and you need to respond accordingly.")
+                        "The user is asking questions, and you need to respond accordingly.")
+
 
         # 프롬프트와 질문 연결
         prompt = ChatPromptTemplate.from_messages([

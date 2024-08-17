@@ -13,16 +13,16 @@
 -- -- History 데이터 삽입
 -- INSERT INTO histories (user_id, voice_id, situation, start_time, end_time, date, my_role, ai_role) 
 -- VALUES 
--- ((SELECT id FROM users WHERE email='sangthree@naver.com'), 1, '학교놀이', '16:13:00', '16:13:00', '2024-07-27', '학생', '선생님'),
--- ((SELECT id FROM users WHERE email='sangthree@naver.com'), 2, '소꿉놀이', '16:13:00', '16:13:00', '2024-07-27', '남자친구', '여자친구'),
--- ((SELECT id FROM users WHERE email='sangthree@naver.com'), 2, '소꿉놀이', '16:13:00', '16:13:00', '2024-07-27', '엄마', '아빠'),
--- ((SELECT id FROM users WHERE email='sangthree@naver.com'), 3, '시장놀이', '16:13:00', '16:13:00', '2024-07-27', '할머니', '사장님'),
--- ((SELECT id FROM users WHERE email='sangthree@naver.com'), 3, '가족놀이', '16:13:00', '16:13:00', '2024-07-27', '남편', '아내'),
--- ((SELECT id FROM users WHERE email='sangthree@naver.com'), 4, '소꿉놀이', '16:13:00', '16:13:00', '2024-07-27', '동생', '형'),
--- ((SELECT id FROM users WHERE email='sangthree@naver.com'), 1, '시장놀이', '16:13:00', '16:13:00', '2024-07-27', '엄마', '아들'),
--- ((SELECT id FROM users WHERE email='sangthree@naver.com'), 1, '병원놀이', '16:13:00', '16:13:00', '2024-07-27', '환자', '의사'),
--- ((SELECT id FROM users WHERE email='sangthree@naver.com'), 3, '학교놀이', '11:50:13', '11:50:13', '2024-08-01', '선생님', '학생'),
--- ((SELECT id FROM users WHERE email='sangthree@naver.com'), 4, '병원놀이', '02:13:56', '02:13:56', '2024-07-30', '환자', '의사');
+-- ((SELECT id FROM users WHERE email='sangthree@naver.com'), 1, '학교 놀이', '16:13:00', '16:13:00', '2024-07-27', '학생', '선생님'),
+-- ((SELECT id FROM users WHERE email='sangthree@naver.com'), 2, '소꿉 놀이', '16:13:00', '16:13:00', '2024-07-27', '남자친구', '여자친구'),
+-- ((SELECT id FROM users WHERE email='sangthree@naver.com'), 2, '소꿉 놀이', '16:13:00', '16:13:00', '2024-07-27', '엄마', '아빠'),
+-- ((SELECT id FROM users WHERE email='sangthree@naver.com'), 3, '시장 놀이', '16:13:00', '16:13:00', '2024-07-27', '할머니', '사장님'),
+-- ((SELECT id FROM users WHERE email='sangthree@naver.com'), 3, '가족 놀이', '16:13:00', '16:13:00', '2024-07-27', '남편', '아내'),
+-- ((SELECT id FROM users WHERE email='sangthree@naver.com'), 4, '소꿉 놀이', '16:13:00', '16:13:00', '2024-07-27', '동생', '형'),
+-- ((SELECT id FROM users WHERE email='sangthree@naver.com'), 1, '시장 놀이', '16:13:00', '16:13:00', '2024-07-27', '엄마', '아들'),
+-- ((SELECT id FROM users WHERE email='sangthree@naver.com'), 1, '병원 놀이', '16:13:00', '16:13:00', '2024-07-27', '환자', '의사'),
+-- ((SELECT id FROM users WHERE email='sangthree@naver.com'), 3, '학교 놀이', '11:50:13', '11:50:13', '2024-08-01', '선생님', '학생'),
+-- ((SELECT id FROM users WHERE email='sangthree@naver.com'), 4, '병원 놀이', '02:13:56', '02:13:56', '2024-07-30', '환자', '의사');
 
 -- INSERT INTO dialogs (history_id, user_id, speaker, message, message_time) VALUES
 -- (1, 1, '학생', '선생님, 저 오늘 발표 준비했어요!', '2024-08-01 10:00:00'),
