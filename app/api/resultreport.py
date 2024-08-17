@@ -108,7 +108,7 @@ class FullReportResponse(BaseModel):
     emotional_development: EmotionalDevelopmentResponse
 
 
-@router.get("/report/{history_id}", response_model=FullReportResponse)
+@router.get("/{history_id}", response_model=FullReportResponse)
 async def get_report(history_id: int, db: AsyncSession = Depends(get_db)):
     history = await get_history_by_id(db, history_id)
     if not history:
@@ -179,7 +179,7 @@ async def get_report(history_id: int, db: AsyncSession = Depends(get_db)):
 
 
 
-@router.get("/roleplay/chat/analysis", response_model=ResponseModel)
+@router.get("/result/analysis", response_model=ResponseModel)
 async def get_chat_analyze(user_id: int, db: AsyncSession = Depends(get_db)):
     histories = await get_histories_by_user_id(db, user_id)
     if not histories:
@@ -212,7 +212,7 @@ async def get_chat_analyze(user_id: int, db: AsyncSession = Depends(get_db)):
     return {"history_list": response_data}
 
 
-@router.post("/analyze_role_play/")
+@router.post("/chat/result")
 async def analyze_role_play(request: RolePlayAnalysisRequest, db: AsyncSession = Depends(get_db)):  # 텍스트 입력을 받아서 처리
     global messages
     try:
