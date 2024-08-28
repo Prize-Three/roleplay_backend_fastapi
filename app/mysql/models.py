@@ -3,6 +3,11 @@ from sqlalchemy.orm import relationship
 import enum
 from datetime import datetime
 from mysql.database import Base
+import pytz
+
+
+# 한국 표준시(KST)로 시간 설정
+kst = pytz.timezone('Asia/Seoul')
 
 class User(Base):
     __tablename__ = "users"
@@ -58,7 +63,8 @@ class History(Base):
     situation = Column(String(100))
     start_time = Column(Time)  # 시작 시간
     end_time = Column(Time)  # 종료 시간
-    date = Column(Date, default=datetime.utcnow)
+    # date = Column(Date, default=datetime.utcnow)
+    date = Column(Date, default=lambda: datetime.now(kst).date())
     my_role = Column(String(100))
     ai_role = Column(String(100))
 
